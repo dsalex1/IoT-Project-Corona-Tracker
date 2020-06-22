@@ -1,34 +1,45 @@
 var net = require('net');
 
-const SERVER_PORT = 60000;
-const CLIENT_PORT = 60001;
+const SERVER_PORT = 6000;
+const SERVER_ADRESS ="0.0.0.0"
 
-var server = net.createServer((socket) => {
+const NUM_HOSTS = 10
+
+var receivedData = Array(NUM_HOSTS).fill("");
+
+for (var i = SERVER_PORT; i < SERVER_PORT + NUM_HOSTS; i++)
+    ((i)=>
+    net.createServer((socket) => {
     socket.on('data', (data) => {
-        console.log(`[SERVER] received '${data.toString()}', echoing`)
-        socket.write("echo '"+data.toString()+"'")
+        receivedData[i] = receivedData[i] + data
+        while (receivedData[i].indexOf("\n") >= 0) {
+            if (receivedData[i].startsWith("POST /") || receivedData[i].startsWith("GET /")) {
+                var req = receivedData[i].substring(0, receivedData[i].indexOf("\n"));
+                socket.write(processRequest(req.split('\t\t')[0].split(" ")[0], req.split('\t\t')[0].split(" ")[1], req.split('\t\t').slice(1).join('\t\t')) + "\n")
+            }
+            receivedData[i] = receivedData[i].substring(receivedData[i].indexOf("\n") + 1, receivedData[i].length)
+        }
     });
-}).listen(SERVER_PORT,()=> {
-    console.log("[SERVER] started on port " + SERVER_PORT)
-});
+    }).listen(i, SERVER_ADRESS,() => {
+        console.log("[SERVER] started on port " + i)
+    }))(i)
 
-setInterval(() => {
-    if (client) client.destroy();
-    try {
-        var client = new net.Socket();
-        client.connect(CLIENT_PORT, function () {
-            console.log('[CLIENT] connected, sending data');
-            client.write('Hello, server! Love, Client.');
-        });
-        client.on('data', function (data) {
-            console.log('[CLIENT] Received: ' + data);
-            client.destroy();
-        });
-        client.on('error', function (ex) {
-            console.log("[CLIENT] error, couldnt connect to port " + CLIENT_PORT);
-        });
-    } catch (e) {
-        console.log("snap")
-    }
 
-}, 5000)
+var processRequest = function(method, path, body) {
+    console.log(`[SERVER] received ${method} at ${path} with '${body}'`)
+
+    if (method == "POST" && path == "/diagnosis-keys") return addDiagnosisKeys(body)
+    if (method == "GET" && path == "/diagnosis-keys") return sendDiagnosisKeys() 
+    return "";
+}
+
+var diagnosisKeys = []
+
+var addDiagnosisKeys = function (keys) {
+    diagnosisKeys = diagnosisKeys.concat(keys.split(","))
+    return "SUCCESS";
+}
+
+var sendDiagnosisKeys = function (keys) {
+    return diagnosisKeys.join("");
+}
