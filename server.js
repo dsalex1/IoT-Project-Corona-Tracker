@@ -4,7 +4,7 @@ const querystring = require('querystring');
 const SERVER_PORT = 6000;
 const SERVER_ADRESS ="0.0.0.0"
 
-const NUM_HOSTS = 20
+const NUM_HOSTS = 50
 
 var receivedData = Array(NUM_HOSTS).fill("");
 for (var i = SERVER_PORT; i < SERVER_PORT + NUM_HOSTS; i++)
@@ -26,10 +26,11 @@ for (var i = SERVER_PORT; i < SERVER_PORT + NUM_HOSTS; i++)
 
 
 var processRequest = function (method, path, body) {
-    console.log(`[SERVER] received ${method} at ${path} with '${body}'`)
+    if (method=="POST")
+        console.log(`[SERVER] received ${method} at ${path} with '${body}'`)
 
     if (method == "POST" && path.split("?")[0] == "/diagnosis-keys") return addDiagnosisKeys(body)
-    if (method == "GET" && path.split("?")[0] == "/diagnosis-keys") return sendDiagnosisKeys(querystring.decode(path.split("?")[1]).index) 
+    if (method == "GET" && path.split("?")[0] == "/diagnosis-keys") return sendDiagnosisKeys(querystring.decode(path.split("?")[1]).ind) 
     return "";
 }
 
@@ -43,7 +44,6 @@ var addDiagnosisKeys = function (keys) {
 }
 
 var sendDiagnosisKeys = function (index) {
-    console.log("sent: '" + diagnosisKeys.slice(index).join("").slice(-124))
     return diagnosisKeys.slice(index).join("").slice(-124)
 }
 
