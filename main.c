@@ -122,6 +122,9 @@ void calculateMatches(char *data)
         memcpy(key, &data[i], 4);
         key[4] = '\0';
         DKStore[DKStoreIndex++] = (uint16_t)hex2int(key);
+
+        if (DKStoreIndex > DK_STORED)
+            DKStoreIndex = 0;
     }
     LOG_INFO("now at %d\n", DKStoreIndex);
 
@@ -201,7 +204,7 @@ PROCESS_THREAD(main_process, ev, data)
     while (1)
     {
         PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
-
+        
         static struct command cmd;
         static uint8_t RPIIndex = RPI_PER_TEK;
         static uint16_t TEK;

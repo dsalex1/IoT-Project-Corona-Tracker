@@ -30,7 +30,7 @@ var processRequest = function (method, path, body) {
         console.log(`[SERVER] received ${method} at ${path} with '${body}'`)
 
     if (method == "POST" && path.split("?")[0] == "/diagnosis-keys") return addDiagnosisKeys(body)
-    if (method == "GET" && path.split("?")[0] == "/diagnosis-keys") return sendDiagnosisKeys(querystring.decode(path.split("?")[1]).ind) 
+    if (method == "GET" && path.split("?")[0] == "/diagnosis-keys") return sendDiagnosisKeys(querystring.decode(path.split("?")[1]).index) 
     return "";
 }
 
